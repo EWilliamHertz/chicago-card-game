@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>♠ CHICAGO ♥ — The Ultimate Trick-Taking Card Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♠</text></svg>">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- AUTH SECTION                                -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="auth-section" class="section active">
+      <div class="auth-container">
+        <div class="auth-logo">
+          <span class="logo-spade">♠</span>
+          <span class="logo-text">CHICAGO</span>
+          <span class="logo-heart">♥</span>
+        </div>
+        <p class="auth-tagline">The ultimate trick-taking card game</p>
+
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form active" autocomplete="off">
+          <h2>Sign In</h2>
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" placeholder="Enter username" required minlength="3" maxlength="20">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Enter password" required minlength="4">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Login</button>
+          <p class="auth-toggle">Don't have an account? <a href="#" id="show-register">Register</a></p>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" class="auth-form" autocomplete="off">
+          <h2>Create Account</h2>
+          <div class="form-group">
+            <label for="register-username">Username</label>
+            <input type="text" id="register-username" placeholder="Choose a username" required minlength="3" maxlength="20">
+          </div>
+          <div class="form-group">
+            <label for="register-password">Password</label>
+            <input type="password" id="register-password" placeholder="Choose a password" required minlength="4">
+          </div>
+          <div class="form-group">
+            <label for="register-confirm">Confirm Password</label>
+            <input type="password" id="register-confirm" placeholder="Confirm password" required minlength="4">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Register</button>
+          <p class="auth-toggle">Already have an account? <a href="#" id="show-login">Sign In</a></p>
+        </form>
+
+        <div id="auth-message" class="message hidden"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- MAIN MENU SECTION                           -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="menu-section" class="section">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <span class="top-bar-logo">♠ CHICAGO ♥</span>
+        </div>
+        <div class="top-bar-center">
+          <nav class="main-nav">
+            <button class="nav-btn active" data-view="lobby">Lobby</button>
+            <button class="nav-btn" data-view="matchmaking">Matchmaking</button>
+            <button class="nav-btn" data-view="leaderboard">Leaderboard</button>
+            <button class="nav-btn" data-view="profile">Profile</button>
+          </nav>
+        </div>
+        <div class="top-bar-right">
+          <span class="online-indicator"><span class="online-dot"></span> <span id="online-count">0</span> online</span>
+          <span id="user-badge" class="badge"></span>
+          <span id="user-display-name" class="user-name"></span>
+          <button id="logout-btn" class="btn btn-sm btn-secondary">Logout</button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+
+        <!-- LOBBY VIEW -->
+        <div id="lobby-view" class="view active">
+          <div class="lobby-header">
+            <h2>Game Lobby</h2>
+            <div class="create-game-controls">
+              <label>Players:</label>
+              <select id="create-player-count" class="select-input">
+                <option value="2">2 Players</option>
+                <option value="3">3 Players</option>
+                <option value="4" selected>4 Players</option>
+              </select>
+              <button id="create-lobby-btn" class="btn btn-primary">Create Game</button>
+            </div>
+          </div>
+
+          <!-- Lobby List -->
+          <div id="lobby-list" class="lobby-list">
+            <p class="empty-state">No open lobbies. Create one to get started!</p>
+          </div>
+
+          <!-- Lobby Detail (when joined) -->
+          <div id="lobby-detail" class="lobby-detail hidden">
+            <div class="lobby-detail-header">
+              <h3>Game Lobby — <span id="lobby-detail-id"></span></h3>
+              <button id="leave-lobby-btn" class="btn btn-secondary btn-sm">Leave</button>
+            </div>
+            <div id="lobby-players" class="lobby-players"></div>
+            <div class="lobby-detail-actions">
+              <button id="start-game-btn" class="btn btn-primary hidden">Start Game</button>
+              <p id="lobby-wait-msg" class="muted">Waiting for host to start…</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MATCHMAKING VIEW -->
+        <div id="matchmaking-view" class="view">
+          <div class="matchmaking-container">
+            <div id="mm-idle" class="matchmaking-state active">
+              <h2>Ranked Matchmaking</h2>
+              <p class="muted">Find opponents matched to your skill level</p>
+              <div id="mm-elo-badge" class="badge badge-lg"></div>
+              <button id="find-match-btn" class="btn btn-primary btn-lg pulse-btn">Find Match</button>
+              <p class="queue-info">Players in queue: <span id="queue-count">0</span></p>
+            </div>
+            <div id="mm-searching" class="matchmaking-state">
+              <h2>Searching for Match…</h2>
+              <div class="spinner"></div>
+              <p class="search-timer">Time elapsed: <span id="search-time">0:00</span></p>
+              <button id="cancel-match-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEADERBOARD VIEW -->
+        <div id="leaderboard-view" class="view">
+          <h2>Leaderboard</h2>
+          <div class="leaderboard-wrapper">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>ELO</th>
+                  <th>W</th>
+                  <th>L</th>
+                  <th>Win%</th>
+                  <th>Games</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PROFILE VIEW -->
+        <div id="profile-view" class="view">
+          <div class="profile-card">
+            <h2>Your Profile</h2>
+            <div class="profile-info">
+              <div class="profile-avatar" id="profile-avatar">♠</div>
+              <h3 id="profile-username"></h3>
+              <div id="profile-elo-badge" class="badge badge-lg"></div>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-box">
+                <span class="stat-value" id="profile-wins">0</span>
+                <span class="stat-label">Wins</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="profile-losses">0</span>
+                <span class="stat-label">Losses</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="profile-winrate">0%</span>
+                <span class="stat-label">Win Rate</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="profile-games">0</span>
+                <span class="stat-label">Games</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.content-area -->
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- GAME SECTION                                -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="game-section" class="section">
+      <div class="game-top-bar">
+        <span id="game-round-info">Round 1</span>
+        <span id="game-trick-info">Trick 0/0</span>
+        <span id="game-trump-info"></span>
+        <button id="game-scores-btn" class="btn btn-sm btn-secondary">Scores ▼</button>
+      </div>
+
+      <div class="game-table" id="game-table">
+        <!-- Top player (index varies) -->
+        <div class="player-spot top" id="player-top">
+          <div class="player-info">
+            <span class="player-name"></span>
+            <span class="player-elo badge badge-sm"></span>
+            <span class="player-score"></span>
+          </div>
+          <div class="player-cards"></div>
+        </div>
+
+        <!-- Left player -->
+        <div class="player-spot left" id="player-left">
+          <div class="player-info">
+            <span class="player-name"></span>
+            <span class="player-elo badge badge-sm"></span>
+            <span class="player-score"></span>
+          </div>
+          <div class="player-cards"></div>
+        </div>
+
+        <!-- Right player -->
+        <div class="player-spot right" id="player-right">
+          <div class="player-info">
+            <span class="player-name"></span>
+            <span class="player-elo badge badge-sm"></span>
+            <span class="player-score"></span>
+          </div>
+          <div class="player-cards"></div>
+        </div>
+
+        <!-- Trick area (center) -->
+        <div class="trick-area" id="trick-area"></div>
+
+        <!-- Bottom (you) -->
+        <div class="player-spot bottom" id="player-bottom">
+          <div class="player-info">
+            <span class="player-name"></span>
+            <span class="player-elo badge badge-sm"></span>
+            <span class="player-score"></span>
+          </div>
+        </div>
+
+        <!-- Your hand -->
+        <div class="hand" id="my-hand"></div>
+
+        <!-- Discard Panel (shown during discard_1 and discard_2 phases) -->
+        <div id="discard-panel" class="panel hidden" style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.85);padding:16px;z-index:10;text-align:center;">
+          <h3 id="discard-phase-title" style="color:#ffd700;margin-bottom:8px;">Select Cards to Discard</h3>
+          <p id="discard-phase-subtitle" style="color:#ccc;margin-bottom:12px;">Click cards to select them for discard</p>
+          <div id="discard-hand" class="card-row" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;"></div>
+          <button id="confirm-discard-btn" class="btn btn-primary" onclick="window.__confirmDiscard()">Confirm Discard</button>
+          <div id="discard-waiting" class="hidden" style="color:#aaa;margin-top:8px;">Waiting for other players...</div>
+        </div>
+
+        <!-- Poker Scoring Panel (shown during poker_scoring phase) -->
+        <div id="poker-scoring-panel" class="panel hidden" style="position:absolute;inset:0;background:rgba(0,0,0,0.85);padding:24px;z-index:10;overflow-y:auto;">
+          <h3 style="color:#ffd700;text-align:center;margin-bottom:16px;">Poker Hand Results</h3>
+          <div id="poker-results-list"></div>
+        </div>
+
+      </div>
+
+      <div class="game-bottom-bar">
+        <button id="chicago-btn" class="btn btn-gold hidden">Declare Chicago!</button>
+        <span id="game-my-score"></span>
+        <span id="game-my-name"></span>
+      </div>
+
+      <!-- Scores Dropdown -->
+      <div id="scores-panel" class="scores-panel hidden">
+        <h3>Scores</h3>
+        <div id="scores-list"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- MODALS                                      -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div id="modal-content" class="modal-content"></div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- CONFETTI CANVAS -->
+    <canvas id="confetti-canvas" class="confetti-canvas hidden"></canvas>
+
+  </div><!-- /#app -->
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
